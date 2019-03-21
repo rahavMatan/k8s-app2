@@ -1,0 +1,21 @@
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build  -t docker-app-2  -f  ./client/Dockerfile.dev ./client
+script:
+  - docker run docker-app-2 npm run test -- --coverage
+
+after_success:
+  - docker build -t rahavmatan/app2-client ./client
+  - docker build -t rahavmatan/app2-nginx ./nginx
+  - docker build -t rahavmatan/app2-server ./server
+  - docker build -t rahavmatan/app2-worker ./worker
+
+  - echo "$docker_pass" | docker login  -u "$docker_user" --password-stdin
+  
+  - docker push rahavmatan/app2-client
+  - docker push rahavmatan/app2-nginx
+  - docker push rahavmatan/app2-server
+  - docker push rahavmatan/app2-worker
